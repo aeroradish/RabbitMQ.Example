@@ -14,8 +14,8 @@ namespace RabbitMQ.Example.Target1
         {
 
             //ReceiveOneWayMessageQueue();
-            //ReceiveWorkerQueue();
-            ReceiveFromPublisher();
+            ReceiveWorkerQueue();
+            //ReceiveFromPublisher();
         }
 
         #region "OneWayMessageQueue"

@@ -1,0 +1,4 @@
+Install-Package RabbitMQ.Client
+
+
+http://localhost:15672/#/

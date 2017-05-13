@@ -13,8 +13,8 @@ namespace RabbitMQ.Example.StartUp
         static void Main(string[] args)
         {
 
-            //OneWayMessageQueue();
-            //WorkerQueue();
+            OneWayMessageQueue();
+            WorkerQueue();
             PublishToSubscribers();
         }
 
