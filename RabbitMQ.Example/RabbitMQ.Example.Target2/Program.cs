@@ -13,8 +13,8 @@ namespace RabbitMQ.Example.Target2
         static void Main(string[] args)
         {
 
-            //ReceiveWorkerQueue();
-            ReceiveFromPublisher();
+            ReceiveWorkerQueue();
+            //ReceiveFromPublisher();
         }
 
         #region "WorkerQueue"     
