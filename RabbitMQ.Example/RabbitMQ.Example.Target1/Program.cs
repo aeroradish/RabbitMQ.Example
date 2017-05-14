@@ -13,9 +13,10 @@ namespace RabbitMQ.Example.Target1
         static void Main(string[] args)
         {
 
-            //ReceiveOneWayMessageQueue();
-            ReceiveWorkerQueue();
+            ReceiveOneWayMessageQueue();
+            //ReceiveWorkerQueue();
             //ReceiveFromPublisher();
+            //ReceiveObject();
         }
 
         #region "OneWayMessageQueue"
@@ -49,6 +50,19 @@ namespace RabbitMQ.Example.Target1
             IConnection connection = messagingService.GetRabbitMqConnection();
             IModel model = connection.CreateModel();
             messagingService.ReceivePublishSubscribeMessageReceiverOne(model);
+        }
+
+        #endregion
+
+
+        #region "Serialize Object"
+
+        public static void ReceiveObject()
+        {
+            AmqpMessagingService messagingService = new AmqpMessagingService();
+            IConnection connection = messagingService.GetRabbitMqConnection();
+            IModel model = connection.CreateModel();
+            messagingService.ReceiveObjectFromQueue(model);
         }
 
         #endregion

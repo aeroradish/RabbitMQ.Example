@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using Newtonsoft.Json;
+using RabbitMQ.Client;
 using RabbitMqService;
 using System;
 using System.Collections.Generic;
@@ -14,8 +15,9 @@ namespace RabbitMQ.Example.StartUp
         {
 
             OneWayMessageQueue();
-            WorkerQueue();
-            PublishToSubscribers();
+            //WorkerQueue();
+            //PublishToSubscribers();
+            //PublishObject();
         }
 
         #region "OneWayMessageQueue"
@@ -90,6 +92,31 @@ namespace RabbitMQ.Example.StartUp
                 if (message.ToLower() == "q") break;
 
                 messagingService.SendMessageToPublishSubscribeQueues(message, model);
+            }
+        }
+
+        #endregion
+
+        #region "Serialize Object"
+
+        public static void PublishObject()
+        {
+            AmqpMessagingService messagingService = new AmqpMessagingService();
+            IConnection connection = messagingService.GetRabbitMqConnection();
+            IModel model = connection.CreateModel();
+            messagingService.SetUpQueueForSerialization(model);
+
+            SendObject(model, messagingService);
+        }
+
+        public static void SendObject(IModel model, AmqpMessagingService messagingService)
+        {
+            Console.WriteLine("Enter customer name. Quit with 'q'.");
+            while (true)
+            {
+                string customerName = Console.ReadLine();
+                if (customerName.ToLower() == "q") break;
+                messagingService.SendObjectToQueue(customerName, model);
             }
         }
 
