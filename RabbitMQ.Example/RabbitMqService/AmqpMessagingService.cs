@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using Newtonsoft.Json;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.MessagePatterns;
 using System;
@@ -23,6 +24,8 @@ namespace RabbitMqService
         private string _publishSubscribeExchangeName = "PublishSubscribeExchange";
         private string _publishSubscribeQueueOne = "PublishSubscribeQueueOne";
         private string _publishSubscribeQueueTwo = "PublishSubscribeQueueTwo";
+
+        private string _serialisationQueueName = "SerialisationDemoQueue";
 
         public AmqpMessagingService()
         {
@@ -121,7 +124,6 @@ namespace RabbitMqService
             model.BasicPublish(_publishSubscribeExchangeName, "", basicProperties, messageBytes);
         }
 
-
         public void ReceivePublishSubscribeMessageReceiverOne(IModel model)
         {
             model.BasicQos(0, 1, false);
@@ -147,6 +149,44 @@ namespace RabbitMqService
                 subscription.Ack(deliveryArguments);
             }
         }
+        #endregion
+
+        #region "Serialize Object"
+
+        public void SetUpQueueForSerialization(IModel model)
+        {
+            model.QueueDeclare(_serialisationQueueName, _durable, false, false, null);
+        }
+
+        public void SendObjectToQueue(string message, IModel model)
+        {
+            Customer customer = new Customer() { CustomerID = DateTime.Now.Ticks, FullName = message };
+
+            IBasicProperties basicProperties = model.CreateBasicProperties();
+            basicProperties.SetPersistent(true);
+            String jsonified = JsonConvert.SerializeObject(customer);
+            byte[] customerBuffer = Encoding.UTF8.GetBytes(jsonified);
+            model.BasicPublish("", _serialisationQueueName, basicProperties, customerBuffer);
+
+        }
+
+        public void ReceiveObjectFromQueue(IModel model)
+        {
+            model.BasicQos(0, 1, false);
+            QueueingBasicConsumer consumer = new QueueingBasicConsumer(model);
+            model.BasicConsume(_serialisationQueueName, false, consumer);
+            while (true)
+            {
+                BasicDeliverEventArgs deliveryArguments = consumer.Queue.Dequeue() as BasicDeliverEventArgs;
+                String jsonified = Encoding.UTF8.GetString(deliveryArguments.Body);
+                Customer customer = JsonConvert.DeserializeObject<Customer>(jsonified);
+                Console.WriteLine("Pure json: {0}", jsonified);
+                Console.WriteLine("Customer name: {0}", customer.FullName);
+                Console.WriteLine("Customer Id: {0}", customer.CustomerID);
+                model.BasicAck(deliveryArguments.DeliveryTag, false);
+            }
+        }
+
         #endregion
     }
 }
